@@ -1,157 +1,566 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Train Booking System</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Indian Rail Route Finder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <style>
-        body {
-            font-family: Arial;
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: white;
-            text-align: center;
-            padding: 30px;
-        }
+    :root {
+      --maroon: #8B1A1A;
+      --deep-red: #6B0F0F;
+      --gold: #C8962E;
+      --gold-light: #E8B94A;
+      --cream: #FBF5EC;
+      --warm-white: #FFF9F0;
+      --text-dark: #1E0D0D;
+      --text-mid: #5A3A2C;
+      --track: #D4B896;
+    }
 
-        .container {
-            background: rgba(255,255,255,0.05);
-            padding: 20px;
-            border-radius: 15px;
-            width: 320px;
-            margin: auto;
-        }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--cream);
+      color: var(--text-dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-        select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: none;
-        }
+    /* ── HEADER ── */
+    header {
+      background: var(--maroon);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      position: relative;
+      overflow: hidden;
+    }
 
-        button {
-            background: #22c55e;
-            color: white;
-            cursor: pointer;
-        }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: repeating-linear-gradient(90deg, var(--gold) 0 18px, transparent 18px 26px);
+    }
 
-        .card {
-            background: #1e293b;
-            padding: 15px;
-            margin: 15px auto;
-            width: 320px;
-            border-radius: 10px;
-        }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      color: var(--gold-light);
+      letter-spacing: 0.03em;
+    }
 
-        .hidden {
-            display: none;
-        }
-    </style>
+    .logo span { color: #fff; font-weight: 400; font-size: 0.9rem; margin-left: 8px; opacity: 0.75; }
+
+    .badge {
+      background: var(--gold);
+      color: var(--deep-red);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(160deg, var(--deep-red) 0%, var(--maroon) 55%, #A93030 100%);
+      padding: 64px 40px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '🚂';
+      position: absolute;
+      font-size: 220px;
+      right: -30px;
+      top: -30px;
+      opacity: 0.06;
+      transform: scaleX(-1);
+    }
+
+    /* SVG track lines */
+    .tracks {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 28px;
+    }
+
+    .hero-inner { max-width: 680px; position: relative; z-index: 1; }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 em { color: var(--gold-light); font-style: normal; }
+
+    .hero p {
+      color: rgba(255,255,255,0.72);
+      font-size: 1rem;
+      font-weight: 300;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── SEARCH CARD ── */
+    .search-wrap {
+      max-width: 780px;
+      margin: -48px auto 0;
+      padding: 0 24px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .card {
+      background: var(--warm-white);
+      border-radius: 16px;
+      padding: 36px 40px 40px;
+      box-shadow: 0 8px 40px rgba(107,15,15,0.14), 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid rgba(200,150,46,0.18);
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      color: var(--maroon);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px; height: 20px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+    label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+    }
+
+    select {
+      appearance: none;
+      background: var(--cream);
+      border: 1.5px solid #E0C9A6;
+      border-radius: 10px;
+      padding: 12px 40px 12px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.97rem;
+      color: var(--text-dark);
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238B1A1A' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+
+    select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(200,150,46,0.15);
+    }
+
+    .swap-btn {
+      background: var(--maroon);
+      color: var(--gold-light);
+      border: none;
+      border-radius: 50%;
+      width: 42px; height: 42px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s, background 0.2s;
+      flex-shrink: 0;
+      align-self: flex-end;
+      margin-bottom: 0;
+    }
+
+    .swap-btn:hover { background: var(--deep-red); transform: rotate(180deg); }
+
+    .search-btn {
+      width: 100%;
+      background: var(--maroon);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .search-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+      transform: translateX(-100%);
+      transition: transform 0.4s ease;
+    }
+
+    .search-btn:hover { background: var(--deep-red); box-shadow: 0 4px 18px rgba(107,15,15,0.35); }
+    .search-btn:hover::after { transform: translateX(100%); }
+    .search-btn:active { transform: scale(0.98); }
+
+    /* ── RESULTS ── */
+    .results-wrap {
+      max-width: 780px;
+      margin: 32px auto 60px;
+      padding: 0 24px;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .result-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+    }
+
+    .result-count {
+      background: var(--maroon);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* Train card */
+    .train-card {
+      background: var(--warm-white);
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin-bottom: 14px;
+      border: 1px solid #EAD9C0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 2px 12px rgba(107,15,15,0.07);
+      animation: slideUp 0.35s ease both;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .train-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(107,15,15,0.12);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .train-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--maroon);
+      margin-bottom: 6px;
+    }
+
+    .route-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--text-mid);
+      font-weight: 400;
+    }
+
+    .route-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .route-dash {
+      flex: 1;
+      height: 1px;
+      border-top: 2px dashed #D4B896;
+      min-width: 32px;
+    }
+
+    .fare-box {
+      text-align: right;
+    }
+
+    .fare-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      font-weight: 600;
+    }
+
+    .fare-amount {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1.1;
+    }
+
+    .fare-amount sup { font-size: 0.65em; vertical-align: super; }
+
+    /* Empty / Not found */
+    .no-result {
+      text-align: center;
+      padding: 48px 24px;
+      animation: slideUp 0.35s ease;
+    }
+
+    .no-result .icon { font-size: 3rem; margin-bottom: 14px; }
+
+    .no-result h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      color: var(--maroon);
+      margin-bottom: 8px;
+    }
+
+    .no-result p { color: var(--text-mid); font-size: 0.92rem; }
+
+    /* Idle state */
+    .idle-state {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--text-mid);
+    }
+    .idle-state .icon { font-size: 2.4rem; opacity: 0.5; }
+    .idle-state p { margin-top: 10px; font-size: 0.9rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--text-dark);
+      color: rgba(255,255,255,0.45);
+      text-align: center;
+      padding: 20px;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+    }
+
+    footer span { color: var(--gold); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 560px) {
+      header { padding: 0 20px; }
+      .hero { padding: 48px 20px 72px; }
+      .search-wrap, .results-wrap { padding: 0 14px; }
+      .card { padding: 24px 20px 28px; }
+      .form-row { grid-template-columns: 1fr; gap: 14px; }
+      .swap-btn { display: none; }
+    }
+  </style>
 </head>
-
 <body>
 
-<h1>🚆 Train Booking System</h1>
+<!-- HEADER -->
+<header>
+  <div class="logo">🚆 RailRoute <span>Indian Railways</span></div>
+  <div class="badge">Live Finder</div>
+</header>
 
-<!-- SEARCH SECTION -->
-<div class="container" id="searchPage">
-    <select id="source">
-        <option value="">Select From</option>
-        <option>Mumbai</option>
-        <option>Delhi</option>
-        <option>Kolkata</option>
-        <option>Chennai</option>
-        <option>Bangalore</option>
-        <option>Hyderabad</option>
-        <option>Goa</option>
-        <option>Varanasi</option>
-    </select>
-
-    <select id="destination">
-        <option value="">Select To</option>
-        <option>Mumbai</option>
-        <option>Delhi</option>
-        <option>Kolkata</option>
-        <option>Chennai</option>
-        <option>Bangalore</option>
-        <option>Hyderabad</option>
-        <option>Goa</option>
-        <option>Varanasi</option>
-    </select>
-
-    <button onclick="searchTrain()">Search Trains</button>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <h1>Find Your <em>Train Route</em><br/>Across India</h1>
+    <p>Search direct trains between major Indian cities instantly.</p>
+  </div>
+  <svg class="tracks" viewBox="0 0 1440 28" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <line x1="0" y1="10" x2="1440" y2="10" stroke="rgba(200,150,46,0.4)" stroke-width="2"/>
+    <line x1="0" y1="20" x2="1440" y2="20" stroke="rgba(200,150,46,0.4)" stroke-width="2"/>
+    <line x1="30"  y1="6" x2="30"  y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="90"  y1="6" x2="90"  y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="150" y1="6" x2="150" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="210" y1="6" x2="210" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="270" y1="6" x2="270" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="330" y1="6" x2="330" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="390" y1="6" x2="390" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="450" y1="6" x2="450" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="510" y1="6" x2="510" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="570" y1="6" x2="570" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="630" y1="6" x2="630" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="690" y1="6" x2="690" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="750" y1="6" x2="750" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="810" y1="6" x2="810" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="870" y1="6" x2="870" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="930" y1="6" x2="930" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="990" y1="6" x2="990" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="1050" y1="6" x2="1050" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="1110" y1="6" x2="1110" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="1170" y1="6" x2="1170" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="1230" y1="6" x2="1230" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="1290" y1="6" x2="1290" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="1350" y1="6" x2="1350" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="1410" y1="6" x2="1410" y2="24" stroke="rgba(200,150,46,0.5)" stroke-width="3" stroke-linecap="round"/>
+  </svg>
 </div>
 
-<div id="result"></div>
+<!-- SEARCH CARD -->
+<div class="search-wrap">
+  <div class="card">
+    <div class="card-title">Search Trains</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="source">From</label>
+        <select id="source">
+          <option value="">Select city…</option>
+          <option>Kolkata</option>
+          <option>Mumbai</option>
+          <option>Chennai</option>
+          <option>Bangalore</option>
+          <option>Delhi</option>
+          <option>Goa</option>
+          <option>Hyderabad</option>
+          <option>Varanasi</option>
+        </select>
+      </div>
 
-<!-- TICKET PAGE -->
-<div id="ticketPage" class="hidden">
-    <div class="card">
-        <h2>🎟 Ticket Confirmed</h2>
-        <p id="trainName"></p>
-        <p id="route"></p>
-        <p id="price"></p>
-        <button onclick="goBack()">⬅ Back</button>
+      <button class="swap-btn" onclick="swapCities()" title="Swap cities">⇄</button>
+
+      <div class="form-group">
+        <label for="dest">To</label>
+        <select id="dest">
+          <option value="">Select city…</option>
+          <option>Kolkata</option>
+          <option>Mumbai</option>
+          <option>Chennai</option>
+          <option>Bangalore</option>
+          <option>Delhi</option>
+          <option>Goa</option>
+          <option>Hyderabad</option>
+          <option>Varanasi</option>
+        </select>
+      </div>
     </div>
+    <button class="search-btn" onclick="searchTrains()">🔍 &nbsp;Search Trains</button>
+  </div>
 </div>
+
+<!-- RESULTS -->
+<div class="results-wrap" id="resultsWrap">
+  <div class="idle-state">
+    <div class="icon">🗺️</div>
+    <p>Select cities above and hit <strong>Search Trains</strong> to begin.</p>
+  </div>
+</div>
+
+<footer>Made with ❤️ for <span>Indian Railways</span> &nbsp;|&nbsp; Data is illustrative</footer>
 
 <script>
-const trains = [
-    ["Humsafar Express", "Kolkata", "Delhi", "2300"],
-    ["Tejas Express", "Mumbai", "Goa", "1700"],
-    ["Jan Shatabdi", "Chennai", "Hyderabad", "1400"],
-    ["Uday Express", "Bangalore", "Hyderabad", "1600"],
-    ["Vande Bharat", "Delhi", "Varanasi", "2800"]
-];
+  const trains = [
+    { name: "Humsafar Express", from: "Kolkata",   to: "Delhi",     fare: 2300 },
+    { name: "Tejas Express",    from: "Mumbai",    to: "Goa",       fare: 1700 },
+    { name: "Jan Shatabdi",     from: "Chennai",   to: "Hyderabad", fare: 1400 },
+    { name: "Uday Express",     from: "Bangalore", to: "Hyderabad", fare: 1600 },
+    { name: "Vande Bharat",     from: "Delhi",     to: "Varanasi",  fare: 2800 },
+  ];
 
-function searchTrain() {
-    let source = document.getElementById("source").value;
-    let destination = document.getElementById("destination").value;
+  function searchTrains() {
+    const src  = document.getElementById('source').value.trim();
+    const dest = document.getElementById('dest').value.trim();
+    const wrap = document.getElementById('resultsWrap');
 
-    let output = "";
-    let found = false;
-
-    if (source === "" || destination === "") {
-        document.getElementById("result").innerHTML = "⚠ Select both cities";
-        return;
+    if (!src || !dest) {
+      wrap.innerHTML = `<div class="no-result"><div class="icon">⚠️</div><h3>Please select both cities</h3><p>Choose a departure and destination city first.</p></div>`;
+      return;
+    }
+    if (src === dest) {
+      wrap.innerHTML = `<div class="no-result"><div class="icon">🔄</div><h3>Same city selected</h3><p>Please choose two different cities.</p></div>`;
+      return;
     }
 
-    for (let i = 0; i < trains.length; i++) {
-        if (trains[i][1] === source && trains[i][2] === destination) {
-            output += `
-                <div class="card">
-                    <h3>${trains[i][0]}</h3>
-                    <p>${source} ➝ ${destination}</p>
-                    <p>₹${trains[i][3]}</p>
-                    <button onclick="bookTrain('${trains[i][0]}','${source}','${destination}','${trains[i][3]}')">Book</button>
-                </div>
-            `;
-            found = true;
-        }
+    const results = trains.filter(t => t.from.toLowerCase() === src.toLowerCase() && t.to.toLowerCase() === dest.toLowerCase());
+
+    if (results.length === 0) {
+      wrap.innerHTML = `
+        <div class="no-result">
+          <div class="icon">🚫</div>
+          <h3>No direct trains found</h3>
+          <p>No trains available from <strong>${src}</strong> to <strong>${dest}</strong>.<br/>Try checking nearby cities or alternate routes.</p>
+        </div>`;
+      return;
     }
 
-    if (!found) {
-        output = "❌ No trains found";
-    }
+    let html = `
+      <div class="result-header">
+        <span class="result-label">Available Trains — ${src} → ${dest}</span>
+        <span class="result-count">${results.length} found</span>
+      </div>`;
 
-    document.getElementById("result").innerHTML = output;
-}
+    results.forEach((t, i) => {
+      html += `
+        <div class="train-card" style="animation-delay:${i * 0.08}s">
+          <div>
+            <div class="train-name">🚆 ${t.name}</div>
+            <div class="route-line">
+              <span class="route-dot"></span>
+              <span>${t.from}</span>
+              <span class="route-dash"></span>
+              <span>${t.to}</span>
+              <span class="route-dot"></span>
+            </div>
+          </div>
+          <div class="fare-box">
+            <div class="fare-label">Fare</div>
+            <div class="fare-amount"><sup>₹</sup>${t.fare.toLocaleString('en-IN')}</div>
+          </div>
+        </div>`;
+    });
 
-function bookTrain(name, from, to, price) {
-    document.getElementById("searchPage").style.display = "none";
-    document.getElementById("result").style.display = "none";
-    document.getElementById("ticketPage").style.display = "block";
+    wrap.innerHTML = html;
+  }
 
-    document.getElementById("trainName").innerText = "Train: " + name;
-    document.getElementById("route").innerText = "Route: " + from + " ➝ " + to;
-    document.getElementById("price").innerText = "Fare: ₹" + price;
-}
-
-function goBack() {
-    document.getElementById("searchPage").style.display = "block";
-    document.getElementById("result").style.display = "block";
-    document.getElementById("ticketPage").style.display = "none";
-}
+  function swapCities() {
+    const s = document.getElementById('source');
+    const d = document.getElementById('dest');
+    const tmp = s.value;
+    s.value = d.value;
+    d.value = tmp;
+  }
 </script>
-
 </body>
 </html>
