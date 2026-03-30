@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Train Booking System</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .container {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            width: 320px;
+            margin: auto;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+        }
+
+        button {
+            background: #22c55e;
+            color: white;
+            cursor: pointer;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 15px;
+            margin: 15px auto;
+            width: 320px;
+            border-radius: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🚆 Train Booking System</h1>
+
+<!-- SEARCH SECTION -->
+<div class="container" id="searchPage">
+    <select id="source">
+        <option value="">Select From</option>
+        <option>Mumbai</option>
+        <option>Delhi</option>
+        <option>Kolkata</option>
+        <option>Chennai</option>
+        <option>Bangalore</option>
+        <option>Hyderabad</option>
+        <option>Goa</option>
+        <option>Varanasi</option>
+    </select>
+
+    <select id="destination">
+        <option value="">Select To</option>
+        <option>Mumbai</option>
+        <option>Delhi</option>
+        <option>Kolkata</option>
+        <option>Chennai</option>
+        <option>Bangalore</option>
+        <option>Hyderabad</option>
+        <option>Goa</option>
+        <option>Varanasi</option>
+    </select>
+
+    <button onclick="searchTrain()">Search Trains</button>
+</div>
+
+<div id="result"></div>
+
+<!-- TICKET PAGE -->
+<div id="ticketPage" class="hidden">
+    <div class="card">
+        <h2>🎟 Ticket Confirmed</h2>
+        <p id="trainName"></p>
+        <p id="route"></p>
+        <p id="price"></p>
+        <button onclick="goBack()">⬅ Back</button>
+    </div>
+</div>
+
+<script>
+const trains = [
+    ["Humsafar Express", "Kolkata", "Delhi", "2300"],
+    ["Tejas Express", "Mumbai", "Goa", "1700"],
+    ["Jan Shatabdi", "Chennai", "Hyderabad", "1400"],
+    ["Uday Express", "Bangalore", "Hyderabad", "1600"],
+    ["Vande Bharat", "Delhi", "Varanasi", "2800"]
+];
+
+function searchTrain() {
+    let source = document.getElementById("source").value;
+    let destination = document.getElementById("destination").value;
+
+    let output = "";
+    let found = false;
+
+    if (source === "" || destination === "") {
+        document.getElementById("result").innerHTML = "⚠ Select both cities";
+        return;
+    }
+
+    for (let i = 0; i < trains.length; i++) {
+        if (trains[i][1] === source && trains[i][2] === destination) {
+            output += `
+                <div class="card">
+                    <h3>${trains[i][0]}</h3>
+                    <p>${source} ➝ ${destination}</p>
+                    <p>₹${trains[i][3]}</p>
+                    <button onclick="bookTrain('${trains[i][0]}','${source}','${destination}','${trains[i][3]}')">Book</button>
+                </div>
+            `;
+            found = true;
+        }
+    }
+
+    if (!found) {
+        output = "❌ No trains found";
+    }
+
+    document.getElementById("result").innerHTML = output;
+}
+
+function bookTrain(name, from, to, price) {
+    document.getElementById("searchPage").style.display = "none";
+    document.getElementById("result").style.display = "none";
+    document.getElementById("ticketPage").style.display = "block";
+
+    document.getElementById("trainName").innerText = "Train: " + name;
+    document.getElementById("route").innerText = "Route: " + from + " ➝ " + to;
+    document.getElementById("price").innerText = "Fare: ₹" + price;
+}
+
+function goBack() {
+    document.getElementById("searchPage").style.display = "block";
+    document.getElementById("result").style.display = "block";
+    document.getElementById("ticketPage").style.display = "none";
+}
+</script>
+
+</body>
+</html>
